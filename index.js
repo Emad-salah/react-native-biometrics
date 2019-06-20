@@ -1,23 +1,40 @@
+import { NativeModules } from "react-native";
 
-import { NativeModules } from 'react-native'
-
-const { ReactNativeBiometrics } = NativeModules
+const { ReactNativeBiometrics } = NativeModules;
 
 export default {
   /**
    * Enum for touch id sensor type
    */
-  TouchID: 'TouchID',
+  TouchID: "TouchID",
   /**
    * Enum for face id sensor type
    */
-  FaceID: 'FaceID',
+  FaceID: "FaceID",
   /**
    * Returns promise that resolves to null, TouchID, or FaceID
    * @returns {Promise} Promise that resolves to null, TouchID, or FaceID
    */
   isSensorAvailable: () => {
-    return ReactNativeBiometrics.isSensorAvailable()
+    return ReactNativeBiometrics.isSensorAvailable();
+  },
+  /**
+   * Sets a biometric key alias. This is useful for creating
+   * multiple users in one app with different key pairs
+   * @returns {string} The newly set alias
+   */
+  setBiometricKeyAlias: alias => {
+    ReactNativeBiometrics.setBiometricKeyAlias(alias);
+    return alias;
+  },
+  /**
+   * Gets the biometric key alias. This is useful for creating
+   * multiple users in one app with different key pairs
+   * @returns {string} The newly set alias
+   */
+  getBiometricKeyAlias: alias => {
+    ReactNativeBiometrics.getBiometricKeyAlias(alias);
+    return alias;
   },
   /**
    * Prompts user with biometrics dialog using the passed in prompt message if
@@ -26,8 +43,8 @@ export default {
    * @param {string} promptMessage
    * @returns {Promise}  Promise that resolves to newly generated public key
    */
-  createKeys: (promptMessage) => {
-    return ReactNativeBiometrics.createKeys(promptMessage)
+  createKeys: promptMessage => {
+    return ReactNativeBiometrics.createKeys(promptMessage);
   },
   /**
    * Returns promise that resolves to true or false indicating if the keys
@@ -35,7 +52,7 @@ export default {
    * @returns {Promise} Promise that resolves to true or false
    */
   deleteKeys: () => {
-    return ReactNativeBiometrics.deleteKeys()
+    return ReactNativeBiometrics.deleteKeys();
   },
   /**
    * Prompts user with biometrics dialog using the passed in prompt message and
@@ -45,7 +62,7 @@ export default {
    * @returns {Promise}  Promise that resolves to cryptographic signature
    */
   createSignature: (promptMessage, payload) => {
-    return ReactNativeBiometrics.createSignature(promptMessage, payload)
+    return ReactNativeBiometrics.createSignature(promptMessage, payload);
   },
   /**
    * Prompts user with biometrics dialog using the passed in prompt message and
@@ -55,7 +72,7 @@ export default {
    * @returns {Promise}  Promise that resolves if the user passes, and
    * rejects if the user fails or cancels
    */
-  simplePrompt: (promptMessage) => {
-    return ReactNativeBiometrics.simplePrompt(promptMessage)
+  simplePrompt: promptMessage => {
+    return ReactNativeBiometrics.simplePrompt(promptMessage);
   }
-}
+};

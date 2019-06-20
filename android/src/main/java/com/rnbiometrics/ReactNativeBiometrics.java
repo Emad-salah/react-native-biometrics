@@ -42,6 +42,16 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public String getBiometricKeyAlias() {
+        return this.biometricKeyAlias;
+    }
+
+    @ReactMethod
+    public void setBiometricKeyAlias(String biometricKeyAlias) {
+        this.biometricKeyAlias = biometricKeyAlias;
+    }
+
+    @ReactMethod
     public void isSensorAvailable(Promise promise) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
