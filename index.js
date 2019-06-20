@@ -21,6 +21,7 @@ export default {
   /**
    * Sets a biometric key alias. This is useful for creating
    * multiple users in one app with different key pairs
+   * @param {string} alias
    * @returns {string} The newly set alias
    */
   setBiometricKeyAlias: alias => {
@@ -32,9 +33,8 @@ export default {
    * multiple users in one app with different key pairs
    * @returns {string} The newly set alias
    */
-  getBiometricKeyAlias: alias => {
-    ReactNativeBiometrics.getBiometricKeyAlias(alias);
-    return alias;
+  getBiometricKeyAlias: () => {
+    return ReactNativeBiometrics.getBiometricKeyAlias();
   },
   /**
    * Prompts user with biometrics dialog using the passed in prompt message if

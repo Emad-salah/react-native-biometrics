@@ -21,7 +21,7 @@ declare module "react-native-biometrics" {
   /**
    * Gets the biometric key alias. This is useful for creating
    * multiple users in one app with different key pairs
-   * @returns {string} The newly set alias
+   * @returns {string} The current alias
    */
   function getBiometricKeyAlias(): string;
   /**
