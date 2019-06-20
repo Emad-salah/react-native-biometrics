@@ -25,8 +25,7 @@ export default {
    * @returns {string} The newly set alias
    */
   setBiometricKeyAlias: alias => {
-    ReactNativeBiometrics.setBiometricKeyAlias(alias);
-    return alias;
+    return ReactNativeBiometrics.setBiometricKeyAlias(alias);
   },
   /**
    * Gets the biometric key alias. This is useful for creating

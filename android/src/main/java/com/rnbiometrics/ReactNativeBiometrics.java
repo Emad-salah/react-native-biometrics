@@ -30,7 +30,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
 
 public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
 
-    protected String biometricKeyAlias = "biometric_key";
+    String biometricKeyAlias = "biometric_key";
 
     public ReactNativeBiometrics(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -43,12 +43,13 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public String getBiometricKeyAlias() {
-        return this.biometricKeyAlias;
+        return biometricKeyAlias;
     }
 
     @ReactMethod
-    public void setBiometricKeyAlias(String biometricKeyAlias) {
-        this.biometricKeyAlias = biometricKeyAlias;
+    public String setBiometricKeyAlias(String alias) {
+        biometricKeyAlias = alias;
+        return biometricKeyAlias;
     }
 
     @ReactMethod
