@@ -10,6 +10,8 @@
 
 @implementation ReactNativeBiometrics
 
+NSString biometricKeyAlias = @"com.rnbiometrics.biometricKey"
+
 RCT_EXPORT_MODULE(ReactNativeBiometrics);
 
 RCT_EXPORT_METHOD(isSensorAvailable:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
@@ -17,6 +19,15 @@ RCT_EXPORT_METHOD(isSensorAvailable:(RCTPromiseResolveBlock)resolve rejecter:(RC
   LAContext *context = [[LAContext alloc] init];
 
   if ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:NULL]) {
+    resolve([self getBiometryType:context]);
+  } else {
+    resolve(Nil);
+  }
+}
+
+RCT_EXPORT_METHOD(setBiometricKeyAlias:(NSString *)alias) {
+  biometricKeyAlias = alias;
+  if () {
     resolve([self getBiometryType:context]);
   } else {
     resolve(Nil);
