@@ -10,7 +10,7 @@
 
 @implementation ReactNativeBiometrics
 
-NSString biometricKeyAlias = @"com.rnbiometrics.biometricKey"
+NSString *biometricKeyAlias = @"com.rnbiometrics.biometricKey";
 
 RCT_EXPORT_MODULE(ReactNativeBiometrics);
 
@@ -25,13 +25,9 @@ RCT_EXPORT_METHOD(isSensorAvailable:(RCTPromiseResolveBlock)resolve rejecter:(RC
   }
 }
 
-RCT_EXPORT_METHOD(setBiometricKeyAlias:(NSString *)alias) {
+RCT_EXPORT_METHOD(setBiometricKeyAlias:(NSString *)alias resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
   biometricKeyAlias = alias;
-  if () {
-    resolve([self getBiometryType:context]);
-  } else {
-    resolve(Nil);
-  }
+  resolve(biometricKeyAlias);
 }
 
 RCT_EXPORT_METHOD(createKeys: (NSString *)promptMessage resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
@@ -155,7 +151,6 @@ RCT_EXPORT_METHOD(simplePrompt: (NSString *)promptMessage resolver:(RCTPromiseRe
 }
 
 - (NSData *) getBiometricKeyTag {
-  NSString *biometricKeyAlias = @"com.rnbiometrics.biometricKey";
   NSData *biometricKeyTag = [biometricKeyAlias dataUsingEncoding:NSUTF8StringEncoding];
   return biometricKeyTag;
 }
