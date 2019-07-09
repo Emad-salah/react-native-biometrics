@@ -41,7 +41,41 @@ RCT_EXPORT_METHOD(createKeys: (NSString *)promptMessage resolver:(RCTPromiseReso
         if (success) {
           [self createAndStoreKeyPair:resolve rejecter:reject];
         } else {
-          reject(@"fingerprint_error", @"Could not confirm fingerprint", nil);
+          NSString *errorReason;
+          switch (fingerprintError.code) {
+            case LAErrorAuthenticationFailed:
+                errorReason = @"LAErrorAuthenticationFailed";
+                break;
+                
+            case LAErrorUserCancel:
+                errorReason = @"LAErrorUserCancel";
+                break;
+                
+            case LAErrorUserFallback:
+                errorReason = @"LAErrorUserFallback";
+                break;
+                
+            case LAErrorSystemCancel:
+                errorReason = @"LAErrorSystemCancel";
+                break;
+                
+            case LAErrorPasscodeNotSet:
+                errorReason = @"LAErrorPasscodeNotSet";
+                break;
+                
+            case LAErrorTouchIDNotAvailable:
+                errorReason = @"LAErrorTouchIDNotAvailable";
+                break;
+                
+            case LAErrorTouchIDNotEnrolled:
+                errorReason = @"LAErrorTouchIDNotEnrolled";
+                break;
+                
+            default:
+                errorReason = @"RCTTouchIDUnknownError";
+                break;
+          }
+          reject(errorReason, errorReason, nil);
         }
       }];
     }
@@ -144,7 +178,42 @@ RCT_EXPORT_METHOD(simplePrompt: (NSString *)promptMessage resolver:(RCTPromiseRe
       if (success) {
         resolve(@(YES));
       } else {
-        reject(@"fingerprint_error", @"Could not confirm fingerprint", nil);
+        NSString *errorReason;
+          switch (fingerprintError.code) {
+            case LAErrorAuthenticationFailed:
+                errorReason = @"LAErrorAuthenticationFailed";
+                break;
+                
+            case LAErrorUserCancel:
+                errorReason = @"LAErrorUserCancel";
+                break;
+                
+            case LAErrorUserFallback:
+                errorReason = @"LAErrorUserFallback";
+                break;
+                
+            case LAErrorSystemCancel:
+                errorReason = @"LAErrorSystemCancel";
+                break;
+                
+            case LAErrorPasscodeNotSet:
+                errorReason = @"LAErrorPasscodeNotSet";
+                break;
+                
+            case LAErrorTouchIDNotAvailable:
+                errorReason = @"LAErrorTouchIDNotAvailable";
+                break;
+                
+            case LAErrorTouchIDNotEnrolled:
+                errorReason = @"LAErrorTouchIDNotEnrolled";
+                break;
+                
+            default:
+                errorReason = @"RCTTouchIDUnknownError";
+                break;
+          }
+        NSLog(errorReason);
+        reject(@"fingerprint_error", errorReason, nil);
       }
     }];
   });
