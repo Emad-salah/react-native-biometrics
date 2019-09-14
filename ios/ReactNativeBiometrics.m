@@ -97,7 +97,7 @@ RCT_EXPORT_METHOD(createKeys: (NSString *)promptMessage resolver:(RCTPromiseReso
   NSData *biometricKeyTag = [self getBiometricKeyTag];
   NSDictionary *keyAttributes = @{
                                   (id)kSecClass: (id)kSecClassKey,
-                                  (id)kSecAttrKeyType: (id)kSecAttrKeyTypeRSA,
+                                  (id)kSecAttrKeyType: (id)kSecAttrKeyTypeECSECPrimeRandom,
                                   (id)kSecAttrKeySizeInBits: @2048,
                                   (id)kSecPrivateKeyAttrs: @{
                                       (id)kSecAttrIsPermanent: @YES,
@@ -115,8 +115,8 @@ RCT_EXPORT_METHOD(createKeys: (NSString *)promptMessage resolver:(RCTPromiseReso
     id publicKey = CFBridgingRelease(SecKeyCopyPublicKey((SecKeyRef)privateKey));
     CFDataRef publicKeyDataRef = SecKeyCopyExternalRepresentation((SecKeyRef)publicKey, nil);
     NSData *publicKeyData = (__bridge NSData *)publicKeyDataRef;
-    NSData *publicKeyDataWithHeader = [self addHeaderPublickey:publicKeyData];
-    NSString *publicKeyString = [publicKeyDataWithHeader base64EncodedStringWithOptions:0];
+    // NSData *publicKeyDataWithHeader = [self addHeaderPublickey:publicKeyData];
+    NSString *publicKeyString = [publicKeyData base64EncodedStringWithOptions:0];
     resolve(publicKeyString);
   } else {
     NSString *message = [NSString stringWithFormat:@"Key generation error: %@", gen_error];
@@ -143,7 +143,7 @@ RCT_EXPORT_METHOD(createSignature: (NSString *)promptMessage payload:(NSString *
     NSDictionary *query = @{
                             (id)kSecClass: (id)kSecClassKey,
                             (id)kSecAttrApplicationTag: biometricKeyTag,
-                            (id)kSecAttrKeyType: (id)kSecAttrKeyTypeRSA,
+                            (id)kSecAttrKeyType: (id)kSecAttrKeyTypeECSECPrimeRandom,
                             (id)kSecReturnRef: @YES,
                             (id)kSecUseOperationPrompt: promptMessage
                             };
@@ -153,7 +153,7 @@ RCT_EXPORT_METHOD(createSignature: (NSString *)promptMessage payload:(NSString *
     if (status == errSecSuccess) {
       NSError *error;
       NSData *dataToSign = [payload dataUsingEncoding:NSUTF8StringEncoding];
-      NSData *signature = CFBridgingRelease(SecKeyCreateSignature(privateKey, kSecKeyAlgorithmRSASignatureMessagePKCS1v15SHA256, (CFDataRef)dataToSign, (void *)&error));
+      NSData *signature = CFBridgingRelease(SecKeyCreateSignature(privateKey, kSecKeyAlgorithmECDSASignatureMessageX962SHA256, (CFDataRef)dataToSign, (void *)&error));
 
       if (signature != nil) {
         NSString *signatureString = [signature base64EncodedStringWithOptions:0];
@@ -229,7 +229,7 @@ RCT_EXPORT_METHOD(simplePrompt: (NSString *)promptMessage resolver:(RCTPromiseRe
   NSDictionary *deleteQuery = @{
                                 (id)kSecClass: (id)kSecClassKey,
                                 (id)kSecAttrApplicationTag: biometricKeyTag,
-                                (id)kSecAttrKeyType: (id)kSecAttrKeyTypeRSA
+                                (id)kSecAttrKeyType: (id)kSecAttrKeyTypeECSECPrimeRandom
                                 };
 
   OSStatus status = SecItemDelete((__bridge CFDictionaryRef)deleteQuery);

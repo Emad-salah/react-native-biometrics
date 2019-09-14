@@ -22,7 +22,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
-import java.security.spec.RSAKeyGenParameterSpec;
+import java.security.spec.ECGenParameterSpec;
 
 /**
  * Created by brandon on 4/5/18.
@@ -114,7 +114,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
     public void createSignature(String title, String payload, Promise promise) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Signature signature = Signature.getInstance("SHA256withRSA");
+                Signature signature = Signature.getInstance("SHA256withEC");
                 KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
                 keyStore.load(null);
 
@@ -200,11 +200,11 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
             public void onAuthenticated(FingerprintManager.CryptoObject cryptoObject) {
                 try {
                     deleteBiometricKey();
-                    KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
+                    ECGenParameterSpec ECGenParameterSpec = new ECGenParameterSpec("P-256");
+                    KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
                     KeyGenParameterSpec keyGenParameterSpec = new KeyGenParameterSpec.Builder(biometricKeyAlias, KeyProperties.PURPOSE_SIGN)
                             .setDigests(KeyProperties.DIGEST_SHA256)
-                            .setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
-                            .setAlgorithmParameterSpec(new RSAKeyGenParameterSpec(2048, RSAKeyGenParameterSpec.F4))
+                            .setAlgorithmParameterSpec(ECGenParameterSpec)
                             .setUserAuthenticationRequired(true)
                             .build();
                     keyPairGenerator.initialize(keyGenParameterSpec);
