@@ -114,7 +114,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
     public void createSignature(String title, String payload, Promise promise) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Signature signature = Signature.getInstance("SHA256withEC");
+                Signature signature = Signature.getInstance("SHA256withECDSA");
                 KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
                 keyStore.load(null);
 
