@@ -90,15 +90,16 @@ RCT_EXPORT_METHOD(createKeys: (NSString *)promptMessage resolver:(RCTPromiseReso
                                                                   kSecAccessControlTouchIDAny, &error);
   if (sacObject == NULL || error != NULL) {
     NSString *errorString = [NSString stringWithFormat:@"SecItemAdd can't create sacObject: %@", error];
-    reject(@"storage_error", errorString, nil);
+    reject(@"sacObject_error", errorString, nil);
     return;
   }
 
   NSData *biometricKeyTag = [self getBiometricKeyTag];
   NSDictionary *keyAttributes = @{
+                                  (id)kSecAttrTokenID: (id)kSecAttrTokenIDSecureEnclave,
                                   (id)kSecClass: (id)kSecClassKey,
                                   (id)kSecAttrKeyType: (id)kSecAttrKeyTypeECSECPrimeRandom,
-                                  (id)kSecAttrKeySizeInBits: @2048,
+                                  (id)kSecAttrKeySizeInBits: @256,
                                   (id)kSecPrivateKeyAttrs: @{
                                       (id)kSecAttrIsPermanent: @YES,
                                       (id)kSecUseAuthenticationUI: (id)kSecUseAuthenticationUIAllow,
@@ -120,7 +121,7 @@ RCT_EXPORT_METHOD(createKeys: (NSString *)promptMessage resolver:(RCTPromiseReso
     resolve(publicKeyString);
   } else {
     NSString *message = [NSString stringWithFormat:@"Key generation error: %@", gen_error];
-    reject(@"storage_error", message, nil);
+    reject(@"privateKey_error", message, nil);
   }
 }
 
@@ -227,10 +228,11 @@ RCT_EXPORT_METHOD(simplePrompt: (NSString *)promptMessage resolver:(RCTPromiseRe
 -(OSStatus) deleteBiometricKey {
   NSData *biometricKeyTag = [self getBiometricKeyTag];
   NSDictionary *deleteQuery = @{
+                                (id)kSecAttrTokenID: (id)kSecAttrTokenIDSecureEnclave,
                                 (id)kSecClass: (id)kSecClassKey,
                                 (id)kSecAttrApplicationTag: biometricKeyTag,
                                 (id)kSecAttrKeyType: (id)kSecAttrKeyTypeECSECPrimeRandom
-                                };
+                              };
 
   OSStatus status = SecItemDelete((__bridge CFDictionaryRef)deleteQuery);
   return status;
