@@ -87,7 +87,7 @@ RCT_EXPORT_METHOD(createKeys: (NSString *)promptMessage resolver:(RCTPromiseReso
 
   SecAccessControlRef sacObject = SecAccessControlCreateWithFlags(kCFAllocatorDefault,
                                                                   kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly,
-                                                                  kSecAccessControlBiometricAny | kSecAccessControlPrivateKeyUsage, &error);
+                                                                  kSecAccessControlUserPresence | kSecAccessControlPrivateKeyUsage, &error);
   if (sacObject == NULL || error != NULL) {
     NSString *errorString = [NSString stringWithFormat:@"SecItemAdd can't create sacObject: %@", error];
     reject(@"sacObject_error", errorString, nil);
@@ -147,7 +147,7 @@ RCT_EXPORT_METHOD(createSignature: (NSString *)promptMessage payload:(NSString *
                             (id)kSecAttrKeyType: (id)kSecAttrKeyTypeECSECPrimeRandom,
                             (id)kSecReturnRef: @YES,
                             (id)kSecUseOperationPrompt: promptMessage
-                            };
+                          };
     SecKeyRef privateKey;
     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, (CFTypeRef *)&privateKey);
 
