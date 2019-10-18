@@ -72,7 +72,7 @@ public class ReactNativeBiometricsDialog extends DialogFragment implements React
         FragmentActivity activityFrag = (FragmentActivity) activity;
 
         biometricAuthenticationHelper = new ReactNativeBiometricsHelper(
-                new BiometricPrompt(activityFrag, executor, new BiometricPrompt.AuthenticationCallback() {
+                new BiometricPrompt(activityFrag.getSupportFragmentManager().findFragmentByTag("fingerprint_dialog"), executor, new BiometricPrompt.AuthenticationCallback() {
                     public void onAuthenticated(BiometricPrompt.CryptoObject cryptoObject) {
                         dismissAllowingStateLoss();
                         if (biometricAuthCallback != null) {
