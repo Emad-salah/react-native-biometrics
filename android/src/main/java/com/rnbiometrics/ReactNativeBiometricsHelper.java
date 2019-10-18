@@ -40,7 +40,9 @@ public class ReactNativeBiometricsHelper extends BiometricPrompt.AuthenticationC
         selfCancelled = false;
 
         cancellationSignal = new CancellationSignal();
-        fingerprintManager.authenticate(promptInfo, cryptoObject);
+        if (promptInfo != null) {
+            fingerprintManager.authenticate(promptInfo, cryptoObject);
+        }
         icon.setImageResource(R.drawable.ic_fp_40px);
     }
 
