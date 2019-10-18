@@ -4,7 +4,8 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
-import android.hardware.fingerprint.FingerprintManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.biometric.BiometricManager;
 import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
@@ -57,9 +58,10 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 ReactApplicationContext reactApplicationContext = getReactApplicationContext();
-                FingerprintManager fingerprintManager = reactApplicationContext.getSystemService(FingerprintManager.class);
-                Boolean isHardwareDetected = fingerprintManager.isHardwareDetected();
-                Boolean hasFingerprints = fingerprintManager.hasEnrolledFingerprints();
+                BiometricManager biometricManager = reactApplicationContext.getSystemService(BiometricManager.class);
+                int biometricStatus = biometricManager.canAuthenticate();
+                Boolean isHardwareDetected = biometricStatus != biometricManager.BIOMETRIC_ERROR_NO_HARDWARE && biometricStatus != biometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+                Boolean hasFingerprints = isHardwareDetected && biometricStatus != biometricManager.BIOMETRIC_ERROR_NONE_ENROLLED;
 
                 KeyguardManager keyguardManager = (KeyguardManager) reactApplicationContext.getSystemService(Context.KEYGUARD_SERVICE);
                 Boolean hasProtectedLockscreen = keyguardManager.isKeyguardSecure();
@@ -121,7 +123,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                 PrivateKey privateKey = (PrivateKey) keyStore.getKey(biometricKeyAlias, null);
                 signature.initSign(privateKey);
 
-                FingerprintManager.CryptoObject cryptoObject = new FingerprintManager.CryptoObject(signature);
+                BiometricPrompt.CryptoObject cryptoObject = new BiometricPrompt.CryptoObject(signature);
 
                 ReactNativeBiometricsDialog dialog = new ReactNativeBiometricsDialog();
                 dialog.init(title, cryptoObject, getSignatureCallback(payload, promise));
@@ -168,7 +170,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
         return new ReactNativeBiometricsCallback() {
             @Override
             @TargetApi(Build.VERSION_CODES.M)
-            public void onAuthenticated(FingerprintManager.CryptoObject cryptoObject) {
+            public void onAuthenticated(BiometricPrompt.CryptoObject cryptoObject) {
                 try {
                     Signature cryptoSignature = cryptoObject.getSignature();
                     cryptoSignature.update(payload.getBytes());
@@ -197,7 +199,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
         return new ReactNativeBiometricsCallback() {
             @Override
             @TargetApi(Build.VERSION_CODES.M)
-            public void onAuthenticated(FingerprintManager.CryptoObject cryptoObject) {
+            public void onAuthenticated(BiometricPrompt.CryptoObject cryptoObject) {
                 try {
                     deleteBiometricKey();
                     ECGenParameterSpec ECGenParameterSpec = new ECGenParameterSpec("P-256");
@@ -235,7 +237,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
     protected ReactNativeBiometricsCallback getSimplePromptCallback(final Promise promise) {
         return new ReactNativeBiometricsCallback() {
             @Override
-            public void onAuthenticated(FingerprintManager.CryptoObject cryptoObject) {
+            public void onAuthenticated(BiometricPrompt.CryptoObject cryptoObject) {
                 promise.resolve(true);
             }
 

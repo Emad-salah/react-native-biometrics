@@ -5,7 +5,7 @@ import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.hardware.fingerprint.FingerprintManager;
+import androidx.biometric.BiometricPrompt;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -25,14 +25,14 @@ import com.rnbiometrics.R;
 public class ReactNativeBiometricsDialog extends DialogFragment implements ReactNativeBiometricsCallback {
 
     protected String title;
-    protected FingerprintManager.CryptoObject cryptoObject;
+    protected BiometricPrompt.CryptoObject cryptoObject;
     protected ReactNativeBiometricsCallback biometricAuthCallback;
 
     protected ReactNativeBiometricsHelper biometricAuthenticationHelper;
     protected Activity activity;
     protected Button cancelButton;
 
-    public void init(String title, FingerprintManager.CryptoObject cryptoObject, ReactNativeBiometricsCallback callback) {
+    public void init(String title, BiometricPrompt.CryptoObject cryptoObject, ReactNativeBiometricsCallback callback) {
         this.title = title;
         this.cryptoObject = cryptoObject;
         this.biometricAuthCallback = callback;
@@ -59,10 +59,15 @@ public class ReactNativeBiometricsDialog extends DialogFragment implements React
             }
         });
 
+        BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle(this.title)
+                .build();
+
         biometricAuthenticationHelper = new ReactNativeBiometricsHelper(
-                activity.getSystemService(FingerprintManager.class),
+                activity.getSystemService(BiometricPrompt.class),
                 (ImageView) view.findViewById(R.id.fingerprint_icon),
                 (TextView) view.findViewById(R.id.fingerprint_status),
+                promptInfo,
                 this
         );
 
@@ -96,7 +101,7 @@ public class ReactNativeBiometricsDialog extends DialogFragment implements React
 
     // ReactNativeBiometricsCallback methods
     @Override
-    public void onAuthenticated(FingerprintManager.CryptoObject cryptoObject) {
+    public void onAuthenticated(BiometricPrompt.CryptoObject cryptoObject) {
         dismissAllowingStateLoss();
         if (biometricAuthCallback != null) {
             biometricAuthCallback.onAuthenticated(cryptoObject);
