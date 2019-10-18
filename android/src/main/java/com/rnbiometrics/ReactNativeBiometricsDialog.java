@@ -61,6 +61,7 @@ public class ReactNativeBiometricsDialog extends DialogFragment implements React
 
         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
                 .setTitle(this.title)
+                .setNegativeButtonText("Cancel")
                 .build();
 
         biometricAuthenticationHelper = new ReactNativeBiometricsHelper(
