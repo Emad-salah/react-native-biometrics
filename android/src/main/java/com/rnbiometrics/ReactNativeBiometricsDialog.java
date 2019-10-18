@@ -2,7 +2,8 @@ package com.rnbiometrics;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.DialogFragment;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import androidx.biometric.BiometricPrompt;
@@ -16,6 +17,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.rnbiometrics.R;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Created by brandon on 4/6/18.
@@ -49,6 +53,7 @@ public class ReactNativeBiometricsDialog extends DialogFragment implements React
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         getDialog().setTitle(title);
         View view = inflater.inflate(R.layout.fingerprint_dialog_container, container, false);
+        Executor executor = Executors.newSingleThreadExecutor();
         cancelButton = (Button) view.findViewById(R.id.cancel_button);
         cancelButton.setText(R.string.fingerprint_cancel);
         cancelButton.setOnClickListener(new View.OnClickListener() {
@@ -65,7 +70,27 @@ public class ReactNativeBiometricsDialog extends DialogFragment implements React
                 .build();
 
         biometricAuthenticationHelper = new ReactNativeBiometricsHelper(
-                activity.getSystemService(BiometricPrompt.class),
+                new BiometricPrompt(this.getActivity(), executor, new BiometricPrompt.AuthenticationCallback() {
+                    public void onAuthenticated(BiometricPrompt.CryptoObject cryptoObject) {
+                        dismissAllowingStateLoss();
+                        if (biometricAuthCallback != null) {
+                            biometricAuthCallback.onAuthenticated(cryptoObject);
+                        }
+                    }
+
+                    public void onCancel() {
+                        if (biometricAuthCallback != null) {
+                            biometricAuthCallback.onCancel();
+                        }
+                    }
+
+                    public void onError() {
+                        dismissAllowingStateLoss();
+                        if (biometricAuthCallback != null) {
+                            biometricAuthCallback.onError();
+                        }
+                    }
+                }),
                 (ImageView) view.findViewById(R.id.fingerprint_icon),
                 (TextView) view.findViewById(R.id.fingerprint_status),
                 promptInfo,

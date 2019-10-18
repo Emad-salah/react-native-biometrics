@@ -18,7 +18,7 @@ public class ReactNativeBiometricsHelper extends BiometricPrompt.AuthenticationC
     private static final long ERROR_TIMEOUT_MILLIS = 1600;
     private static final long SUCCESS_DELAY_MILLIS = 1300;
 
-    private final BiometricPrompt fingerprintManager;
+    private BiometricPrompt fingerprintManager;
     private BiometricPrompt.PromptInfo promptInfo;
     private final ImageView icon;
     private final TextView errorTextView;
