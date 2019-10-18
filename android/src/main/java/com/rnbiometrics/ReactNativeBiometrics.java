@@ -94,7 +94,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                     ReactNativeBiometricsDialog dialog = new ReactNativeBiometricsDialog();
                     dialog.init(title, null, getCreationCallback(promise));
                     FragmentActivity activity = (FragmentActivity) getCurrentActivity();
-                    dialog.show(activity.getSupportFragmentManager(), "fingerprint_dialog");
+                    dialog.show(activity.getSupportFragmentManager().beginTransaction(), "fingerprint_dialog");
                 }
             } else {
                 promise.reject("Cannot generate keys on android versions below 6.0", "Cannot generate keys on android versions below 6.0");
@@ -131,7 +131,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                 dialog.init(title, cryptoObject, getSignatureCallback(payload, promise));
 
                 FragmentActivity activity = (FragmentActivity) getCurrentActivity();
-                dialog.show(activity.getSupportFragmentManager(), "fingerprint_dialog");
+                dialog.show(activity.getSupportFragmentManager().beginTransaction(), "fingerprint_dialog");
             } else {
                 promise.reject("Cannot generate keys on android versions below 6.0", "Cannot generate keys on android versions below 6.0");
             }

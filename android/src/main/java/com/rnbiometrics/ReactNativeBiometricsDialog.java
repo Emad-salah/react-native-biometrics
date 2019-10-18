@@ -69,8 +69,10 @@ public class ReactNativeBiometricsDialog extends DialogFragment implements React
                 .setNegativeButtonText("Cancel")
                 .build();
 
+        FragmentActivity activityFrag = (FragmentActivity) activity;
+
         biometricAuthenticationHelper = new ReactNativeBiometricsHelper(
-                new BiometricPrompt(this.getActivity(), executor, new BiometricPrompt.AuthenticationCallback() {
+                new BiometricPrompt(activityFrag, executor, new BiometricPrompt.AuthenticationCallback() {
                     public void onAuthenticated(BiometricPrompt.CryptoObject cryptoObject) {
                         dismissAllowingStateLoss();
                         if (biometricAuthCallback != null) {
