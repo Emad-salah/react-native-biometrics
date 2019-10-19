@@ -1,6 +1,8 @@
 package com.rnbiometrics;
 
 import android.annotation.TargetApi;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import android.app.KeyguardManager;
 import androidx.fragment.app.FragmentManager;
@@ -8,6 +10,8 @@ import android.content.Context;
 import androidx.biometric.BiometricPrompt;
 import androidx.biometric.BiometricManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.text.TextUtils;
@@ -26,6 +30,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.ECGenParameterSpec;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Created by brandon on 4/5/18.
@@ -34,6 +40,8 @@ import java.security.spec.ECGenParameterSpec;
 public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
 
     String biometricKeyAlias = "biometric_key";
+
+    public ReactNativeBiometricsCallback biometricAuthCallback;
 
     public ReactNativeBiometrics(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -91,10 +99,41 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                     ReactNativeBiometricsCallback createKeysCallback = getCreationCallback(promise);
                     createKeysCallback.onAuthenticated(null);
                 } else {
-                    ReactNativeBiometricsDialog dialog = new ReactNativeBiometricsDialog();
-                    dialog.init(title, null, getCreationCallback(promise));
+                    // ReactNativeBiometricsDialog dialog = new ReactNativeBiometricsDialog();
+                    // dialog.init(title, null, getCreationCallback(promise));
                     FragmentActivity activity = (FragmentActivity) getCurrentActivity();
-                    dialog.show(activity.getSupportFragmentManager().beginTransaction(), "fingerprint_dialog");
+                    // dialog.show(activity.getSupportFragmentManager().beginTransaction(), "fingerprint_dialog");
+                    BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                            .setTitle(title)
+                            .setNegativeButtonText("Cancel")
+                            .build();
+
+                    biometricAuthCallback = getCreationCallback(promise);
+
+                    FragmentActivity activityFrag = (FragmentActivity) activity;
+
+
+                    BiometricPrompt fingerprintManager = new BiometricPrompt(activityFrag, this.getMainThreadExecutor(), new BiometricPrompt.AuthenticationCallback() {
+                        public void onAuthenticated(BiometricPrompt.CryptoObject cryptoObject) {
+                            if (biometricAuthCallback != null) {
+                                biometricAuthCallback.onAuthenticated(cryptoObject);
+                            }
+                        }
+
+                        public void onCancel() {
+                            if (biometricAuthCallback != null) {
+                                biometricAuthCallback.onCancel();
+                            }
+                        }
+
+                        public void onError() {
+                            if (biometricAuthCallback != null) {
+                                biometricAuthCallback.onError();
+                            }
+                        }
+                    });
+
+                    fingerprintManager.authenticate(promptInfo);
                 }
             } else {
                 promise.reject("Cannot generate keys on android versions below 6.0", "Cannot generate keys on android versions below 6.0");
@@ -127,11 +166,11 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
 
                 BiometricPrompt.CryptoObject cryptoObject = new BiometricPrompt.CryptoObject(signature);
 
-                ReactNativeBiometricsDialog dialog = new ReactNativeBiometricsDialog();
-                dialog.init(title, cryptoObject, getSignatureCallback(payload, promise));
-
-                FragmentActivity activity = (FragmentActivity) getCurrentActivity();
-                dialog.show(activity.getSupportFragmentManager(), "fingerprint_dialog");
+//                ReactNativeBiometricsDialog dialog = new ReactNativeBiometricsDialog();
+//                dialog.init(title, cryptoObject, getSignatureCallback(payload, promise));
+//
+//                FragmentActivity activity = (FragmentActivity) getCurrentActivity();
+//                dialog.show(activity.getSupportFragmentManager(), "fingerprint_dialog");
             } else {
                 promise.reject("Cannot generate keys on android versions below 6.0", "Cannot generate keys on android versions below 6.0");
             }
@@ -144,10 +183,10 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
     public void simplePrompt(String title, Promise promise) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                ReactNativeBiometricsDialog dialog = new ReactNativeBiometricsDialog();
-                dialog.init(title, null, getSimplePromptCallback(promise));
-                FragmentActivity activity = (FragmentActivity) getCurrentActivity();
-                dialog.show(activity.getSupportFragmentManager(), "fingerprint_dialog");
+//                ReactNativeBiometricsDialog dialog = new ReactNativeBiometricsDialog();
+//                dialog.init(title, null, getSimplePromptCallback(promise));
+//                FragmentActivity activity = (FragmentActivity) getCurrentActivity();
+//                dialog.show(activity.getSupportFragmentManager(), "fingerprint_dialog");
             } else {
                 promise.reject("Cannot display biometric prompt on android versions below 6.0", "Cannot display biometric prompt on android versions below 6.0");
             }
@@ -253,5 +292,18 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                 promise.reject("Error generating public private keys" , "Error generating public private keys");
             }
         };
+    }
+
+    private Executor getMainThreadExecutor() {
+        return new MainThreadExecutor();
+    }
+
+    private static class MainThreadExecutor implements Executor {
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
+        @Override
+        public void execute(@NonNull Runnable r) {
+            handler.post(r);
+        }
     }
 }
