@@ -81,7 +81,7 @@ public class ReactNativeBiometricsHelper extends BiometricPrompt.AuthenticationC
         icon.postDelayed(new Runnable() {
             @Override
             public void run() {
-                callback.onAuthenticated(result.getCryptoObject());
+                callback.onAuthenticated(result);
             }
         }, SUCCESS_DELAY_MILLIS);
     }

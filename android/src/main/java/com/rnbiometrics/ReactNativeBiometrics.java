@@ -90,7 +90,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createKeys(String title, Promise promise) {
+    public void createKeys(String title, final Promise promise) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (TextUtils.isEmpty(title)) {
@@ -103,7 +103,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                     // dialog.init(title, null, getCreationCallback(promise));
                     FragmentActivity activity = (FragmentActivity) getCurrentActivity();
                     // dialog.show(activity.getSupportFragmentManager().beginTransaction(), "fingerprint_dialog");
-                    BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                    final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
                             .setTitle(title)
                             .setNegativeButtonText("Cancel")
                             .build();
@@ -113,33 +113,42 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                     FragmentActivity activityFrag = (FragmentActivity) activity;
 
 
-                    BiometricPrompt fingerprintManager = new BiometricPrompt(activityFrag, this.getMainThreadExecutor(), new BiometricPrompt.AuthenticationCallback() {
-                        public void onAuthenticated(BiometricPrompt.CryptoObject cryptoObject) {
+                    final BiometricPrompt fingerprintManager = new BiometricPrompt(activityFrag, this.getMainThreadExecutor(activity), new BiometricPrompt.AuthenticationCallback() {
+                        @Override
+                        public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                             if (biometricAuthCallback != null) {
-                                biometricAuthCallback.onAuthenticated(cryptoObject);
+                                biometricAuthCallback.onAuthenticated(result);
                             }
                         }
 
-                        public void onCancel() {
+                        @Override
+                        public void onAuthenticationFailed() {
                             if (biometricAuthCallback != null) {
                                 biometricAuthCallback.onCancel();
                             }
                         }
 
-                        public void onError() {
+                        @Override
+                        public void onAuthenticationError(int errorCode,
+                                                          @NonNull CharSequence errString) {
                             if (biometricAuthCallback != null) {
                                 biometricAuthCallback.onError();
                             }
                         }
                     });
 
-                    fingerprintManager.authenticate(promptInfo);
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            fingerprintManager.authenticate(promptInfo);
+                        }
+                    });
                 }
             } else {
                 promise.reject("Cannot generate keys on android versions below 6.0", "Cannot generate keys on android versions below 6.0");
             }
         } catch (Exception e) {
-            promise.reject("Error generating public private keys: " + e.getMessage(), "Error generating public private keys");
+            promise.reject("Error generating public private keys: " + e.getMessage(), "Error generating public private keys " + e.getMessage() + " " + e.getStackTrace()[0] + " " + e.getStackTrace()[1] + " " + e.getStackTrace()[2] + " " + e.getStackTrace()[3] + " " + e.getStackTrace()[4] + " " + e.getStackTrace()[5]);
         }
     }
 
@@ -164,13 +173,54 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                 PrivateKey privateKey = (PrivateKey) keyStore.getKey(biometricKeyAlias, null);
                 signature.initSign(privateKey);
 
-                BiometricPrompt.CryptoObject cryptoObject = new BiometricPrompt.CryptoObject(signature);
+                final BiometricPrompt.CryptoObject cryptoObject = new BiometricPrompt.CryptoObject(signature);
 
 //                ReactNativeBiometricsDialog dialog = new ReactNativeBiometricsDialog();
 //                dialog.init(title, cryptoObject, getSignatureCallback(payload, promise));
 //
 //                FragmentActivity activity = (FragmentActivity) getCurrentActivity();
 //                dialog.show(activity.getSupportFragmentManager(), "fingerprint_dialog");
+                FragmentActivity activity = (FragmentActivity) getCurrentActivity();
+                final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                        .setTitle(title)
+                        .setNegativeButtonText("Cancel")
+                        .build();
+
+                biometricAuthCallback = getSignatureCallback(payload, promise);
+
+                FragmentActivity activityFrag = (FragmentActivity) activity;
+
+
+                final BiometricPrompt fingerprintManager = new BiometricPrompt(activityFrag, this.getMainThreadExecutor(activity), new BiometricPrompt.AuthenticationCallback() {
+                    @Override
+                    public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                        if (biometricAuthCallback != null) {
+                            biometricAuthCallback.onAuthenticated(result);
+                        }
+                    }
+
+                    @Override
+                    public void onAuthenticationFailed() {
+                        if (biometricAuthCallback != null) {
+                            biometricAuthCallback.onCancel();
+                        }
+                    }
+
+                    @Override
+                    public void onAuthenticationError(int errorCode,
+                                                      @NonNull CharSequence errString) {
+                        if (biometricAuthCallback != null) {
+                            biometricAuthCallback.onError();
+                        }
+                    }
+                });
+
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fingerprintManager.authenticate(promptInfo, cryptoObject);
+                    }
+                });
             } else {
                 promise.reject("Cannot generate keys on android versions below 6.0", "Cannot generate keys on android versions below 6.0");
             }
@@ -211,8 +261,9 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
         return new ReactNativeBiometricsCallback() {
             @Override
             @TargetApi(Build.VERSION_CODES.M)
-            public void onAuthenticated(BiometricPrompt.CryptoObject cryptoObject) {
+            public void onAuthenticated(BiometricPrompt.AuthenticationResult result) {
                 try {
+                    BiometricPrompt.CryptoObject cryptoObject = result.getCryptoObject();
                     Signature cryptoSignature = cryptoObject.getSignature();
                     cryptoSignature.update(payload.getBytes());
                     byte[] signed = cryptoSignature.sign();
@@ -240,7 +291,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
         return new ReactNativeBiometricsCallback() {
             @Override
             @TargetApi(Build.VERSION_CODES.M)
-            public void onAuthenticated(BiometricPrompt.CryptoObject cryptoObject) {
+            public void onAuthenticated(BiometricPrompt.AuthenticationResult result) {
                 try {
                     deleteBiometricKey();
                     ECGenParameterSpec ECGenParameterSpec = new ECGenParameterSpec("P-256");
@@ -278,7 +329,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
     protected ReactNativeBiometricsCallback getSimplePromptCallback(final Promise promise) {
         return new ReactNativeBiometricsCallback() {
             @Override
-            public void onAuthenticated(BiometricPrompt.CryptoObject cryptoObject) {
+            public void onAuthenticated(BiometricPrompt.AuthenticationResult result) {
                 promise.resolve(true);
             }
 
@@ -294,16 +345,20 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
         };
     }
 
-    private Executor getMainThreadExecutor() {
-        return new MainThreadExecutor();
+    private Executor getMainThreadExecutor(FragmentActivity activity) {
+        return new MainThreadExecutor(activity);
     }
 
     private static class MainThreadExecutor implements Executor {
-        private final Handler handler = new Handler(Looper.getMainLooper());
+        protected FragmentActivity activity;
+
+        private MainThreadExecutor(FragmentActivity activity) {
+            this.activity = activity;
+        }
 
         @Override
         public void execute(@NonNull Runnable r) {
-            handler.post(r);
+            activity.runOnUiThread(r);
         }
     }
 }

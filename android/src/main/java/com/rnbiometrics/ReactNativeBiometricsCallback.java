@@ -8,7 +8,7 @@ import androidx.biometric.BiometricPrompt;
 
 public interface ReactNativeBiometricsCallback {
 
-    void onAuthenticated(BiometricPrompt.CryptoObject cryptoObject);
+    void onAuthenticated(BiometricPrompt.AuthenticationResult result);
 
     void onCancel();
 
