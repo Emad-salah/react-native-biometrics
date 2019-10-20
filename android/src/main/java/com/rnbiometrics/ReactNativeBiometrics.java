@@ -163,7 +163,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createSignature(String title, String payload, Promise promise) {
+    public void createSignature(String title, String payload, final Promise promise) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 Signature signature = Signature.getInstance("SHA256withECDSA");
@@ -209,6 +209,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                     @Override
                     public void onAuthenticationError(int errorCode,
                                                       @NonNull CharSequence errString) {
+                        promise.reject("onAuthenticationError:" + errorCode + " Error: " + errString, "onAuthenticationError:" + errorCode + " Error: " + errString);
                         if (biometricAuthCallback != null) {
                             biometricAuthCallback.onError();
                         }
@@ -271,7 +272,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                     signedString = signedString.replaceAll("\r", "").replaceAll("\n", "");
                     promise.resolve(signedString);
                 } catch (Exception e) {
-                    promise.reject("Error creating signature: " + e.getMessage(), "Error creating signature");
+                    promise.reject("Error creating signature: " + e.getMessage(), "Error creating signature: " + e.getMessage());
                 }
             }
 
@@ -310,7 +311,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                     publicKeyString = publicKeyString.replaceAll("\r", "").replaceAll("\n", "");
                     promise.resolve(publicKeyString);
                 } catch (Exception e) {
-                    promise.reject("Error generating public private keys: " + e.getMessage(), "Error generating public private keys");
+                    promise.reject("Error generating public private keys: " + e.getMessage(), "Error generating public private keys: " + e.getMessage());
                 }
             }
 
