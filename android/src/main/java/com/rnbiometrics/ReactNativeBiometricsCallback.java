@@ -1,6 +1,6 @@
 package com.rnbiometrics;
 
-import android.hardware.fingerprint.FingerprintManager;
+import androidx.biometric.BiometricPrompt;
 
 /**
  * Created by brandon on 4/9/18.
@@ -8,7 +8,7 @@ import android.hardware.fingerprint.FingerprintManager;
 
 public interface ReactNativeBiometricsCallback {
 
-    void onAuthenticated(FingerprintManager.CryptoObject cryptoObject);
+    void onAuthenticated(BiometricPrompt.AuthenticationResult result);
 
     void onCancel();
 

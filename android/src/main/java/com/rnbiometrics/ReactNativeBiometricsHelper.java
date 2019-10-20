@@ -1,7 +1,7 @@
 package com.rnbiometrics;
 
 import android.annotation.TargetApi;
-import android.hardware.fingerprint.FingerprintManager;
+import androidx.biometric.BiometricPrompt;
 import android.os.Build;
 import android.os.CancellationSignal;
 import android.widget.ImageView;
@@ -13,12 +13,13 @@ import com.rnbiometrics.R;
  */
 
 @TargetApi(Build.VERSION_CODES.M)
-public class ReactNativeBiometricsHelper extends FingerprintManager.AuthenticationCallback {
+public class ReactNativeBiometricsHelper extends BiometricPrompt.AuthenticationCallback {
 
     private static final long ERROR_TIMEOUT_MILLIS = 1600;
     private static final long SUCCESS_DELAY_MILLIS = 1300;
 
-    private final FingerprintManager fingerprintManager;
+    private BiometricPrompt fingerprintManager;
+    private BiometricPrompt.PromptInfo promptInfo;
     private final ImageView icon;
     private final TextView errorTextView;
     private final ReactNativeBiometricsCallback callback;
@@ -26,20 +27,22 @@ public class ReactNativeBiometricsHelper extends FingerprintManager.Authenticati
 
     private boolean selfCancelled;
 
-    ReactNativeBiometricsHelper(FingerprintManager fingerprintManager, ImageView icon,
-                                  TextView errorTextView, ReactNativeBiometricsCallback callback) {
+    ReactNativeBiometricsHelper(BiometricPrompt fingerprintManager, ImageView icon,
+                                  TextView errorTextView, BiometricPrompt.PromptInfo promptInfo, ReactNativeBiometricsCallback callback) {
         this.fingerprintManager = fingerprintManager;
+        this.promptInfo = promptInfo;
         this.icon = icon;
         this.errorTextView = errorTextView;
         this.callback = callback;
     }
 
-    public void startListening(FingerprintManager.CryptoObject cryptoObject) {
+    public void startListening(BiometricPrompt.CryptoObject cryptoObject) {
         selfCancelled = false;
 
         cancellationSignal = new CancellationSignal();
-        fingerprintManager
-                .authenticate(cryptoObject, cancellationSignal, 0 /* flags */, this, null);
+        if (promptInfo != null) {
+            fingerprintManager.authenticate(promptInfo, cryptoObject);
+        }
         icon.setImageResource(R.drawable.ic_fp_40px);
     }
 
@@ -65,17 +68,12 @@ public class ReactNativeBiometricsHelper extends FingerprintManager.Authenticati
     }
 
     @Override
-    public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
-        showError(helpString);
-    }
-
-    @Override
     public void onAuthenticationFailed() {
         showError(errorTextView.getResources().getString(R.string.fingerprint_not_recognized));
     }
 
     @Override
-    public void onAuthenticationSucceeded(final FingerprintManager.AuthenticationResult result) {
+    public void onAuthenticationSucceeded(final BiometricPrompt.AuthenticationResult result) {
         errorTextView.removeCallbacks(resetErrorTextRunnable);
         icon.setImageResource(R.drawable.ic_fingerprint_success);
         errorTextView.setTextColor(errorTextView.getResources().getColor(R.color.success_color, null));
@@ -83,7 +81,7 @@ public class ReactNativeBiometricsHelper extends FingerprintManager.Authenticati
         icon.postDelayed(new Runnable() {
             @Override
             public void run() {
-                callback.onAuthenticated(result.getCryptoObject());
+                callback.onAuthenticated(result);
             }
         }, SUCCESS_DELAY_MILLIS);
     }
