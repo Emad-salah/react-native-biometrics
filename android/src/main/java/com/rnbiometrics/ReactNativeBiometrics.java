@@ -106,6 +106,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                     final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
                             .setTitle(title)
                             .setNegativeButtonText("Cancel")
+                            .setDeviceCredentialAllowed(true)
                             .build();
 
                     biometricAuthCallback = getCreationCallback(promise);
