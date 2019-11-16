@@ -132,7 +132,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                         public void onAuthenticationError(int errorCode,
                                                           @NonNull CharSequence errString) {
                             if (biometricAuthCallback != null) {
-                                biometricAuthCallback.onError();
+                                biometricAuthCallback.onError(errorCode, errString);
                             }
                         }
                     });
@@ -211,7 +211,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                                                       @NonNull CharSequence errString) {
                         promise.reject("onAuthenticationError:" + errorCode + " Error: " + errString, "onAuthenticationError:" + errorCode + " Error: " + errString);
                         if (biometricAuthCallback != null) {
-                            biometricAuthCallback.onError();
+                            biometricAuthCallback.onError(errorCode, errString);
                         }
                     }
                 });
@@ -282,8 +282,8 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
             }
 
             @Override
-            public void onError() {
-                promise.reject("Error detecting fingerprint", "Error detecting fingerprint");
+            public void onError(int errorCode, @NonNull CharSequence errorMessage) {
+                promise.reject("Error generating public private keys" , "Error generating public private keys.\n Code: " + errorCode + "\nMessage: " + errorMessage);
             }
         };
     }
@@ -321,8 +321,8 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
             }
 
             @Override
-            public void onError() {
-                promise.reject("Error generating public private keys" , "Error generating public private keys");
+            public void onError(int errorCode, @NonNull CharSequence errorMessage) {
+                promise.reject("Error generating public private keys" , "Error generating public private keys.\n Code: " + errorCode + "\nMessage: " + errorMessage);
             }
         };
     }
@@ -340,8 +340,8 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
             }
 
             @Override
-            public void onError() {
-                promise.reject("Error generating public private keys" , "Error generating public private keys");
+            public void onError(int errorCode, @NonNull CharSequence errorMessage) {
+                promise.reject("Error generating public private keys" , "Error generating public private keys.\n Code: " + errorCode + "\nMessage: " + errorMessage);
             }
         };
     }

@@ -12,5 +12,5 @@ public interface ReactNativeBiometricsCallback {
 
     void onCancel();
 
-    void onError();
+    void onError(int errorCode, @NonNull CharSequence errorMessage);
 }
