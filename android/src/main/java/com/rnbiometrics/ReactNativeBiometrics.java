@@ -105,7 +105,6 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                     // dialog.show(activity.getSupportFragmentManager().beginTransaction(), "fingerprint_dialog");
                     final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
                             .setTitle(title)
-                            .setNegativeButtonText("Cancel")
                             .setDeviceCredentialAllowed(true)
                             .build();
 
