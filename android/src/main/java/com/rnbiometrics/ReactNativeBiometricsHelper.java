@@ -55,13 +55,13 @@ public class ReactNativeBiometricsHelper extends BiometricPrompt.AuthenticationC
     }
 
     @Override
-    public void onAuthenticationError(int errMsgId, CharSequence errString) {
+    public void onAuthenticationError(final int errMsgId, final CharSequence errString) {
         if (!selfCancelled) {
             showError(errString);
             icon.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    callback.onError();
+                    callback.onError(errMsgId, errString);
                 }
             }, ERROR_TIMEOUT_MILLIS);
         }

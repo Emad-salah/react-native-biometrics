@@ -1,6 +1,7 @@
 package com.rnbiometrics;
 
 import androidx.biometric.BiometricPrompt;
+import androidx.annotation.NonNull;
 
 /**
  * Created by brandon on 4/9/18.
