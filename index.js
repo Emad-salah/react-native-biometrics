@@ -15,7 +15,7 @@ export default {
 	 * Returns promise that resolves to null, TouchID, or FaceID
 	 * @returns {Promise} Promise that resolves to null, TouchID, or FaceID
 	 */
-	isSensorAvailable: async () => {
+	getSensorAvailability: async () => {
 		const sensorAvailable = ReactNativeBiometrics.isSensorAvailable();
 		if (Platform.OS === "ios") {
 			const sensorExists = sensorAvailable !== "None";

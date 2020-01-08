@@ -11,7 +11,7 @@ declare module "react-native-biometrics" {
 	 * Returns promise that resolves to null, TouchID, or FaceID
 	 * @returns {Promise} Promise that resolves to null, TouchID, or FaceID
 	 */
-	function isSensorAvailable(): Promise<{
+	function getSensorAvailability(): Promise<{
 		hardwareExists: boolean;
 		fingerprintsEnrolled: boolean;
 		sensorAvailable: boolean;
