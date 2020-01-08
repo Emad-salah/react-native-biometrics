@@ -70,7 +70,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 ReactApplicationContext reactApplicationContext = getReactApplicationContext();
-                BiometricManager biometricManager = reactApplicationContext.getSystemService(BiometricManager.class);
+                BiometricManager biometricManager = BiometricManager.from(reactApplicationContext);
                 int biometricStatus = biometricManager.canAuthenticate();
                 Boolean isHardwareDetected = biometricStatus != biometricManager.BIOMETRIC_ERROR_NO_HARDWARE && biometricStatus != biometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE;
                 Boolean hasFingerprints = isHardwareDetected && biometricStatus != biometricManager.BIOMETRIC_ERROR_NONE_ENROLLED;
