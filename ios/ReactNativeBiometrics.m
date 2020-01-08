@@ -241,7 +241,7 @@ RCT_EXPORT_METHOD(simplePrompt: (NSString *)promptMessage resolver:(RCTPromiseRe
 - (NSString *)getBiometryType:(LAContext *)context
 {
   if (@available(iOS 11, *)) {
-    return (context.biometryType == LABiometryTypeFaceID) ? @"FaceID" : @"TouchID";
+    return (context.biometryType == LABiometryTypeFaceID) ? @"FaceID" : (context.biometryType == LABiometryTypeTouchID) ? @"TouchID" : @"None";
   }
 
   return @"TouchID";

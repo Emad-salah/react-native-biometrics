@@ -18,6 +18,8 @@ import android.text.TextUtils;
 import android.util.Base64;
 
 import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -76,10 +78,15 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                 KeyguardManager keyguardManager = (KeyguardManager) reactApplicationContext.getSystemService(Context.KEYGUARD_SERVICE);
                 Boolean hasProtectedLockscreen = keyguardManager.isKeyguardSecure();
 
+                WritableMap sensorResponse = Arguments.createMap();
+                sensorResponse.putBoolean("hardwareExists", isHardwareDetected);
+                sensorResponse.putBoolean("fingerprintsEnrolled", isHardwareDetected);
+                sensorResponse.putBoolean("useableSensor", isHardwareDetected && hasFingerprints && hasProtectedLockscreen);
+
                 if (isHardwareDetected && hasFingerprints && hasProtectedLockscreen) {
-                    promise.resolve("TouchID");
+                    promise.resolve(sensorResponse);
                 } else {
-                    promise.resolve(null);
+                    promise.resolve(sensorResponse);
                 }
             } else {
                 promise.resolve(null);
