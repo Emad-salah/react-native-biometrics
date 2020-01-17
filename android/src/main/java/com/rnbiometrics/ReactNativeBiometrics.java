@@ -273,7 +273,8 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
             publicKeyString = publicKeyString.replaceAll("\r", "").replaceAll("\n", "");
             promise.resolve(publicKeyString);
         } catch (Exception e) {
-            promise.reject("Keystore Error", e.getMessage())
+            //TODO: handle exception
+            promise.reject("Keystore Error", e.getMessage());
         }
     }
 
