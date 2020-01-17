@@ -261,6 +261,22 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
         }
     }
 
+    @ReactMethod
+    public String getPrivateKey(Promise promise) {
+        try {
+            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+    
+            PrivateKey privateKey = (PrivateKey) keyStore.getKey(biometricKeyAlias, null);
+            byte[] privateKeyEncoded = privateKey.getEncoded();
+            String publicKeyString = Base64.encodeToString(privateKeyEncoded, Base64.DEFAULT);
+            publicKeyString = publicKeyString.replaceAll("\r", "").replaceAll("\n", "");
+            promise.resolve(publicKeyString);
+        } catch (Exception e) {
+            promise.reject("Keystore Error", e.getMessage())
+        }
+    }
+
     protected boolean deleteBiometricKey() {
         try {
             KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
