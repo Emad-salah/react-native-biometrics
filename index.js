@@ -91,17 +91,5 @@ export default {
 	 */
 	simplePrompt: promptMessage => {
 		return ReactNativeBiometrics.simplePrompt(promptMessage);
-	},
-	/**
-	 * Returns the private key for the biometric key specified.
-	 *
-	 * WARNING: Do NOT use this method unless if you really need to since that exposes you
-	 * to unnecessary security risks.
-	 * @param {string} promptMessage
-	 * @returns {Promise}  Promise that resolves to the private key, and
-	 * rejects if an error occurred while retrieving it
-	 */
-	UNSAFE_getPrivateKey: () => {
-		return ReactNativeBiometrics.getPrivateKey();
 	}
 };
