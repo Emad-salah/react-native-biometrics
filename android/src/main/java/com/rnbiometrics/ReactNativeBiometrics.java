@@ -130,9 +130,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
 
                         @Override
                         public void onAuthenticationFailed() {
-                            if (biometricAuthCallback != null) {
-                                biometricAuthCallback.onCancel();
-                            }
+                            // Do something
                         }
 
                         @Override
@@ -209,9 +207,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
     
                         @Override
                         public void onAuthenticationFailed() {
-                            if (biometricAuthCallback != null) {
-                                biometricAuthCallback.onCancel();
-                            }
+                            // Do something
                         }
     
                         @Override
