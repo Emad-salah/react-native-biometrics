@@ -80,14 +80,11 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
 
                 WritableMap sensorResponse = Arguments.createMap();
                 sensorResponse.putBoolean("hardwareExists", isHardwareDetected);
-                sensorResponse.putBoolean("fingerprintsEnrolled", isHardwareDetected);
+                sensorResponse.putBoolean("fingerprintsEnrolled", hasFingerprints);
                 sensorResponse.putBoolean("useableSensor", isHardwareDetected && hasFingerprints && hasProtectedLockscreen);
-
-                if (isHardwareDetected && hasFingerprints && hasProtectedLockscreen) {
-                    promise.resolve(sensorResponse);
-                } else {
-                    promise.resolve(sensorResponse);
-                }
+                sensorResponse.putInteger("biometricStatus", biometricStatus);
+                
+                promise.resolve(sensorResponse);
             } else {
                 promise.resolve(null);
             }
