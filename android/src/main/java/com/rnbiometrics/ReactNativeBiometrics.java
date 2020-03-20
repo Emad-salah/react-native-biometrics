@@ -309,6 +309,7 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
                             .setDigests(KeyProperties.DIGEST_SHA256)
                             .setAlgorithmParameterSpec(ECGenParameterSpec)
                             .setUserAuthenticationRequired(result != null)
+                            .setInvalidatedByBiometricEnrollment(false)
                             .build();
                     keyPairGenerator.initialize(keyGenParameterSpec);
 
