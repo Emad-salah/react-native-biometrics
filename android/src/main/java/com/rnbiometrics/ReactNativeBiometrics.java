@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
+import android.app.Activity;
 import android.app.KeyguardManager;
 import androidx.fragment.app.FragmentManager;
 import android.content.Context;
@@ -45,8 +46,11 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
 
     public ReactNativeBiometricsCallback biometricAuthCallback;
 
+    public ReactApplicationContext reactContext;
+
     public ReactNativeBiometrics(ReactApplicationContext reactContext) {
         super(reactContext);
+        this.reactContext = reactContext;
     }
 
     @Override
@@ -69,13 +73,12 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
     public void isSensorAvailable(Promise promise) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                ReactApplicationContext reactApplicationContext = getReactApplicationContext();
-                BiometricManager biometricManager = BiometricManager.from(reactApplicationContext);
+                BiometricManager biometricManager = BiometricManager.from(this.reactContext);
                 int biometricStatus = biometricManager.canAuthenticate();
                 Boolean isHardwareDetected = biometricStatus != biometricManager.BIOMETRIC_ERROR_NO_HARDWARE && biometricStatus != biometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE;
                 Boolean hasFingerprints = isHardwareDetected && biometricStatus != biometricManager.BIOMETRIC_ERROR_NONE_ENROLLED;
 
-                KeyguardManager keyguardManager = (KeyguardManager) reactApplicationContext.getSystemService(Context.KEYGUARD_SERVICE);
+                KeyguardManager keyguardManager = (KeyguardManager) this.reactContext.getSystemService(Context.KEYGUARD_SERVICE);
                 Boolean hasProtectedLockscreen = keyguardManager.isKeyguardSecure();
 
                 WritableMap sensorResponse = Arguments.createMap();
@@ -177,52 +180,53 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
 
                 if (title != null) {
                     final BiometricPrompt.CryptoObject cryptoObject = new BiometricPrompt.CryptoObject(signature);
-    
-    //                ReactNativeBiometricsDialog dialog = new ReactNativeBiometricsDialog();
-    //                dialog.init(title, cryptoObject, getSignatureCallback(payload, promise));
+    //              ReactNativeBiometricsDialog dialog = new ReactNativeBiometricsDialog();
+    //              dialog.init(title, cryptoObject, getSignatureCallback(payload, promise));
     //
-    //                FragmentActivity activity = (FragmentActivity) getCurrentActivity();
-    //                dialog.show(activity.getSupportFragmentManager(), "fingerprint_dialog");
-                    FragmentActivity activity = (FragmentActivity) getCurrentActivity();
-                    final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                            .setTitle(title)
-                            .setNegativeButtonText("Cancel")
-                            .build();
-    
-                    biometricAuthCallback = getSignatureCallback(payload, promise);
-    
-                    FragmentActivity activityFrag = (FragmentActivity) activity;
-    
-    
-                    final BiometricPrompt fingerprintManager = new BiometricPrompt(activityFrag, this.getMainThreadExecutor(activity), new BiometricPrompt.AuthenticationCallback() {
-                        @Override
-                        public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
-                            if (biometricAuthCallback != null) {
-                                biometricAuthCallback.onAuthenticated(result);
+    //              FragmentActivity activity = (FragmentActivity) getCurrentActivity();
+    //              dialog.show(activity.getSupportFragmentManager(), "fingerprint_dialog");
+                    Activity activity = getCurrentActivity();
+                    if (activity != null) {
+                        FragmentActivity activityFrag = (FragmentActivity) activity;
+                        final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                                .setTitle(title)
+                                .setNegativeButtonText("Cancel")
+                                .build();
+        
+                        biometricAuthCallback = getSignatureCallback(payload, promise);
+        
+        
+        
+                        final BiometricPrompt fingerprintManager = new BiometricPrompt(activityFrag, this.getMainThreadExecutor(activityFrag), new BiometricPrompt.AuthenticationCallback() {
+                            @Override
+                            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                                if (biometricAuthCallback != null) {
+                                    biometricAuthCallback.onAuthenticated(result);
+                                }
                             }
-                        }
-    
-                        @Override
-                        public void onAuthenticationFailed() {
-                            // Do something
-                        }
-    
-                        @Override
-                        public void onAuthenticationError(int errorCode,
-                                                          @NonNull CharSequence errString) {
-                            promise.reject("onAuthenticationError:" + errorCode + " Error: " + errString, "onAuthenticationError:" + errorCode + " Error: " + errString);
-                            if (biometricAuthCallback != null) {
-                                biometricAuthCallback.onError(errorCode, errString);
+        
+                            @Override
+                            public void onAuthenticationFailed() {
+                                // Do something
                             }
-                        }
-                    });
-    
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            fingerprintManager.authenticate(promptInfo, cryptoObject);
-                        }
-                    });
+        
+                            @Override
+                            public void onAuthenticationError(int errorCode,
+                                                              @NonNull CharSequence errString) {
+                                promise.reject("onAuthenticationError:" + errorCode + " Error: " + errString, "onAuthenticationError:" + errorCode + " Error: " + errString);
+                                if (biometricAuthCallback != null) {
+                                    biometricAuthCallback.onError(errorCode, errString);
+                                }
+                            }
+                        });
+        
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                fingerprintManager.authenticate(promptInfo, cryptoObject);
+                            }
+                        });
+                    }
                 } else {
                     signature.update(payload.getBytes());
                     byte[] signed = signature.sign();
